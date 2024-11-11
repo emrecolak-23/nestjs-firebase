@@ -18,7 +18,7 @@ import {
   RequestWithUser,
 } from './guards/firebase-auth.guard';
 
-@Controller('auth')
+@Controller('')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
@@ -28,7 +28,6 @@ export class AuthController {
   async login(@Res({ passthrough: true }) response: Response) {
     return tsRestHandler(contracts.auth.login, async ({ headers }) => {
       const accessToken = headers.authorization.replace('Bearer ', '');
-      console.log(accessToken, response);
       try {
         const { userInfo } =
           await this.authService.verifyAndUpsertUser(accessToken);

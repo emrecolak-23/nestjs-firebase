@@ -12,7 +12,6 @@ export class FirebaseAuthGuard implements CanActivate {
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
     const sessionCookie = request.cookies.session as string | undefined | null;
-
     if (!sessionCookie) return false;
 
     try {
@@ -20,12 +19,16 @@ export class FirebaseAuthGuard implements CanActivate {
         .auth()
         .verifySessionCookie(sessionCookie, true);
 
-      if (decodedClaims.email) return true;
-
+      console.log(decodedClaims, 'decodedClaims');
       request.user = {
         email: decodedClaims.email,
         id: decodedClaims.dbUserId,
       };
+      if (decodedClaims.email) return true;
+
+      console.log(request.user, 'request.user');
+
+      return true;
     } catch (_err) {
       return false;
     }

@@ -22,22 +22,33 @@ export class AuthService {
   }> {
     try {
       const decodedToken = await admin.auth().verifyIdToken(accessToken);
-      const userInfo = await this.userModel
-        .findOneAndUpdate(
+
+      let userInfo = await this.userModel.findOne({
+        email: decodedToken.email,
+      });
+
+      if (!userInfo) {
+        userInfo = new this.userModel({
+          email: decodedToken.email,
+          username: decodedToken.name,
+          photo: decodedToken.picture,
+        });
+
+        await userInfo.save();
+      } else {
+        userInfo = await this.userModel.findOneAndUpdate(
           {
             email: decodedToken.email,
           },
           {
-            email: decodedToken.email,
             username: decodedToken.name,
             photo: decodedToken.picture,
           },
           {
-            upsert: true,
             new: true,
           },
-        )
-        .lean<User>();
+        );
+      }
 
       await admin.auth().setCustomUserClaims(decodedToken.uid, {
         dbUserId: userInfo._id,
